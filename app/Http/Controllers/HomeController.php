@@ -12,8 +12,15 @@ class HomeController extends Controller
     {
         $this->notifyService = $notifyService;
     }
+
+    public function test() {
+        return view('test');
+    }
     
     public function index() {
-        $this->notifyService->send("Hello from HomeController");
+        // $this->notifyService->send("Hello from HomeController");
+        $root_data = '😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁 😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁😁';
+    $data = nl2br(e($root_data)); 
+        return view('index', compact('data'));
     }
 }
