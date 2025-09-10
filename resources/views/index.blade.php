@@ -15,7 +15,8 @@
             line-height: 1.5em;       /* chiều cao mỗi dòng */
             max-height: calc(1.5em * 3); /* 3 dòng (có thể thay bằng JS đọc data-line) */
             word-break: break-word;
-            white-space: normal;      /* cho phép xuống dòng */
+            white-space: pre-wrap;      /* cho phép xuống dòng */
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -24,7 +25,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-body">
-                    <div class="description" data-line="2">{!! $data !!}</div>
+                    <div class="description" data-line="3">{{$data}}</div>
                 </div>
             </div>
         </div>
