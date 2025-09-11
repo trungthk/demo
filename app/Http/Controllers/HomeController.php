@@ -21,9 +21,7 @@ class HomeController extends Controller
         // $this->notifyService->send("Hello from HomeController");
         $root_data = '<script>
 const lines = [];
-
 const tags = text.match(/<br\s*[^>]*>\n/gi);
-
 const textBlocks = text.split(/<br\s*[^>]*>\n/gi);
 const displayLine = parseInt($el.attr("data-line"));
 </script>';
