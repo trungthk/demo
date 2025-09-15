@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\EST662Controller;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class EST662Test extends TestCase
@@ -29,13 +30,44 @@ class EST662Test extends TestCase
             ['2025-09-01 04:00:00', '2025-08-31', '2025-08-30'],
             ['2025-09-01 06:00:00', '2025-09-01', '2025-08-31'],
             ['2025-08-31 23:00:00', '2025-08-31', '2025-08-30'],
+            ['2024-02-29 04:00:00', '2024-02-28', '2024-02-27'],
+            ['2024-02-29 08:00:00', '2024-02-29', '2024-02-28'],
+            ['2024-03-01 03:00:00', '2024-02-29', '2024-02-28'],
+            ['2024-03-01 10:00:00', '2024-03-01', '2024-02-29'],
+            ['2025-01-01 03:00:00', '2024-12-31', '2024-12-30'],
+            ['2025-01-01 06:00:00', '2025-01-01', '2024-12-31'],
         ];
 
         foreach ($testCases as [$input, $expectedUpdateAt, $expectedSummaryFrom]) {
-            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $input);
+            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $input);
 
             $this->assertEquals($expectedUpdateAt, $result['update_at']->format('Y-m-d'));
             $this->assertEquals($expectedSummaryFrom, $result['summary_from']->format('Y-m-d'));
+        }
+    }
+
+    public function test_mix_daily_therapist_ranking() {
+        $testCases = [
+            ['2025-06-10 04:00:00', '2025-06-09', '05:00:00'],
+            ['2025-06-10 06:00:00', '2025-06-10', '05:00:00'],
+            ['2025-06-09 23:00:00', '2025-06-09', '05:00:00'],
+            ['2025-06-02 04:00:00', '2025-06-01', '05:00:00'],
+            ['2025-06-02 06:00:00', '2025-06-02', '05:00:00'],
+            ['2025-06-01 23:00:00', '2025-06-01', '05:00:00'],
+            ['2024-02-29 04:00:00', '2024-02-28', '05:00:00'],
+            ['2024-02-29 08:00:00', '2024-02-29', '05:00:00'],
+            ['2024-03-01 03:00:00', '2024-02-29', '05:00:00'],
+            ['2024-03-01 10:00:00', '2024-03-01', '05:00:00'],
+            ['2025-01-01 03:00:00', '2024-12-31', '05:00:00'],
+            ['2025-01-01 06:00:00', '2025-01-01', '05:00:00'],
+        ];
+
+        foreach ($testCases as [$input, $expectedUpdateAt, $expectedUpdateAtHour]) {
+            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $input);
+            Log::debug('Result: ' . print_r($result, true));
+
+            $this->assertEquals($expectedUpdateAt, $result['update_at']->format('Y-m-d'));
+            $this->assertEquals($expectedUpdateAtHour, $result['update_at']->format('H:i:s'));
         }
     }
 
@@ -50,12 +82,43 @@ class EST662Test extends TestCase
             ['2025-09-04 06:00:00', '2025-09-01', '2025-08-25', '2025-08-31'],
             ['2025-09-01 06:00:00', '2025-09-01', '2025-08-25', '2025-08-31'],
             ['2025-09-01 04:00:00', '2025-08-25', '2025-08-18', '2025-08-24'],
+            ['2024-02-29 04:00:00', '2024-02-26', '2024-02-19', '2024-02-25'],
+            ['2024-02-29 08:00:00', '2024-02-26', '2024-02-19', '2024-02-25'],
+            ['2024-03-01 03:00:00', '2024-02-26', '2024-02-19', '2024-02-25'],
+            ['2024-03-01 10:00:00', '2024-02-26', '2024-02-19', '2024-02-25'],
+            ['2025-01-01 03:00:00', '2024-12-30', '2024-12-23', '2024-12-29'],
+            ['2025-01-01 06:00:00', '2024-12-30', '2024-12-23', '2024-12-29'],
+            ['2029-01-01 03:00:00', '2028-12-25', '2028-12-18', '2028-12-24'],
+            ['2029-01-01 06:00:00', '2029-01-01', '2028-12-25', '2028-12-31'],
         ];
 
         foreach ($testCases as [$input, $expectedUpdateAt, $expectedSummaryFrom, $expectedSummaryTo]) {
-            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $input);
+            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $input);
 
             $this->assertEquals($expectedUpdateAt, $result['update_at']->format('Y-m-d'));
+            $this->assertEquals($expectedSummaryFrom, $result['summary_from']->format('Y-m-d'));
+            $this->assertEquals($expectedSummaryTo, $result['summary_to']->format('Y-m-d'));
+        }
+    }
+
+    public function test_mix_weekly_therapist_ranking() {
+        $testCases = [
+            ['2025-06-16 04:00:00', '2025-06-02', '2025-06-08'],
+            ['2025-06-16 08:00:00', '2025-06-09', '2025-06-15'],
+            ['2025-06-23 06:00:00', '2025-06-16', '2025-06-22'],
+            ['2025-06-23 04:00:00', '2025-06-09', '2025-06-15'],
+
+            ['2024-02-29 04:00:00', '2024-02-19', '2024-02-25'],
+            ['2024-02-29 08:00:00', '2024-02-19', '2024-02-25'],
+            ['2025-01-01 03:00:00', '2024-12-23', '2024-12-29'],
+            ['2025-01-01 06:00:00', '2024-12-23', '2024-12-29'],
+            ['2029-01-01 03:00:00', '2028-12-18', '2028-12-24'],
+            ['2029-01-01 06:00:00', '2028-12-25', '2028-12-31'],
+        ];
+
+        foreach ($testCases as [$input, $expectedSummaryFrom, $expectedSummaryTo]) {
+            $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $input);
+
             $this->assertEquals($expectedSummaryFrom, $result['summary_from']->format('Y-m-d'));
             $this->assertEquals($expectedSummaryTo, $result['summary_to']->format('Y-m-d'));
         }
@@ -70,7 +133,7 @@ class EST662Test extends TestCase
      */
     public function test_daily_before_5am() {
         $datetime = '2025-05-01 04:59:00';
-        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
+        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
 
         $this->assertEquals('2025-04-30', $result['update_at']->format('Y-m-d'));
         $this->assertEquals('2025-04-29', $result['summary_from']->format('Y-m-d'));
@@ -84,7 +147,7 @@ class EST662Test extends TestCase
      */
     public function test_daily_after_5am() {
         $datetime = '2025-05-01 05:15:00';
-        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
+        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
 
         $this->assertEquals('2025-05-01', $result['update_at']->format('Y-m-d'));
         $this->assertEquals('2025-04-30', $result['summary_from']->format('Y-m-d'));
@@ -101,7 +164,7 @@ class EST662Test extends TestCase
      */
     public function test_weekly_before_5am() {
         $datetime = '2025-05-01 04:59:00';
-        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         $this->assertEquals('2025-04-28', $result['update_at']->format('Y-m-d'));
         $this->assertEquals('2025-04-21', $result['summary_from']->format('Y-m-d'));
@@ -116,7 +179,7 @@ class EST662Test extends TestCase
      */
     public function test_weekly_after_5am_is_monday() {
         $datetime = '2025-05-05 05:15:00'; // Monday
-        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         $this->assertEquals('2025-05-05', $result['update_at']->format('Y-m-d'));
         $this->assertEquals('2025-04-28', $result['summary_from']->format('Y-m-d'));
@@ -131,7 +194,7 @@ class EST662Test extends TestCase
      */
     public function test_weekly_after_5am_not_monday() {
         $datetime = '2025-05-01 05:15:00'; // Thursday
-        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         $this->assertEquals('2025-04-28', $result['update_at']->format('Y-m-d'));
         $this->assertEquals('2025-04-21', $result['summary_from']->format('Y-m-d'));
@@ -150,7 +213,7 @@ class EST662Test extends TestCase
         $datetime = '2025-05-01 04:59:00'; // Thursday
         $result = $this->getEst662Controller()->getLabelIndex($type, $datetime);
 
-        $this->assertNotContains($type, [EST662Controller::MONTHLY, EST662Controller::WEEKLY, EST662Controller::DAILY]);
+        $this->assertNotContains($type, [EST662Controller::MONTHLY_PERIOD, EST662Controller::WEEKLY_PERIOD, EST662Controller::DAILY_PERIOD]);
         $this->assertEmpty($result);
     }
     // ====================== End Test type ====================== //
@@ -164,8 +227,8 @@ class EST662Test extends TestCase
      */
     public function test_after_5am_is_monday() {
         $datetime = '2025-05-05 05:15:00'; // Monday
-        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
-        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
+        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         // Daily
         $this->assertEquals('2025-05-05', $result_daily['update_at']->format('Y-m-d'));
@@ -185,8 +248,8 @@ class EST662Test extends TestCase
      */
     public function test_after_5am_not_monday() {
         $datetime = '2025-05-01 05:15:00'; // Thursday
-        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
-        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
+        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         // Daily
         $this->assertEquals('2025-05-01', $result_daily['update_at']->format('Y-m-d'));
@@ -205,8 +268,8 @@ class EST662Test extends TestCase
      */
     public function test_before_5am_is_monday() {
         $datetime = '2025-05-05 04:59:00'; // Monday
-        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
-        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
+        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         // Daily
         $this->assertEquals('2025-05-04', $result_daily['update_at']->format('Y-m-d'));
@@ -226,8 +289,8 @@ class EST662Test extends TestCase
      */
     public function test_before_5am_not_monday() {
         $datetime = '2025-05-01 04:59:00'; // Thursday
-        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY, $datetime);
-        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY, $datetime);
+        $result_daily = $this->getEst662Controller()->getLabelIndex(EST662Controller::DAILY_PERIOD, $datetime);
+        $result_weekly = $this->getEst662Controller()->getLabelIndex(EST662Controller::WEEKLY_PERIOD, $datetime);
 
         // Daily
         $this->assertEquals('2025-04-30', $result_daily['update_at']->format('Y-m-d'));
@@ -250,7 +313,7 @@ class EST662Test extends TestCase
     //  */
     // public function test_monthly_after_5am() {
     //     $datetime = '2025-05-06 05:15:00'; // Tuesday
-    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY, $datetime);
+    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY_PERIOD, $datetime);
 
     //     $this->assertNull($result['update_at']);
     //     $this->assertNull($result['summary_from']);
@@ -265,7 +328,7 @@ class EST662Test extends TestCase
     //  */
     // public function test_monthly_before_5am_is_first_month() {
     //     $datetime = '2025-05-01 04:59:00'; // Thursday, first day of month
-    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY, $datetime);
+    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY_PERIOD, $datetime);
 
     //     $this->assertNull($result['update_at']);
     //     $this->assertNull($result['summary_from']);
@@ -280,7 +343,7 @@ class EST662Test extends TestCase
     //  */
     // public function test_monthly_before_5am_not_first_month() {
     //     $datetime = '2025-05-02 04:59:00'; // Friday, not first day of month
-    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY, $datetime);
+    //     $result = $this->getEst662Controller()->getLabelIndex(EST662Controller::MONTHLY_PERIOD, $datetime);
 
     //     $this->assertNull($result['update_at']);
     //     $this->assertNull($result['summary_from']);
