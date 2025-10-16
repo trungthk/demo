@@ -6,7 +6,7 @@ use App\Contracts\NotifyInterface;
 
 class HomeController extends Controller
 {
-    // 3
+    // 2
     public $notifyService;
 
     public function __construct(NotifyInterface $notifyService = null)
