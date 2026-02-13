@@ -7,6 +7,7 @@ use App\Models\User;
 
 class UserController extends Controller
 {
+    // 3
     public $notifyService;
 
     public function __construct(NotifyInterface $notifyService = null)
