@@ -24,7 +24,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-body">
-                    <div class="description" data-line="5">{{$data}}</div>
+                    <div class="description" data-line="3">
+                        {{$data}}
+                    </div>
                 </div>
             </div>
         </div>
